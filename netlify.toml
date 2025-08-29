@@ -1,0 +1,13 @@
+# Netlify configuration file
+
+[build]
+  command = "npm run build"
+  publish = "build"
+
+[dev]
+  command = "npm run dev"
+  port = 3000
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "20"
