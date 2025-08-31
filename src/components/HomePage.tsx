@@ -89,11 +89,96 @@ export function HomePage({ onNavigate, onBookClass }: HomePageProps) {
   }, [videoPlaying]);
 
   const services: Service[] = [
-    // ... (your existing services array, unchanged)
+    {
+      id: 'group-classes',
+      title: 'Group Classes',
+      description: 'Dynamic group sessions for all levels, building skills and community.',
+      icon: 'Users',
+      cta: 'Join a Class',
+      page: 'classes',
+      image: '/assets/group-classes.jpg',
+      altText: 'Group boxing class in action'
+    },
+    {
+      id: 'personal-training',
+      title: 'Personal Training',
+      description: 'One-on-one coaching tailored to your goals and fitness level.',
+      icon: 'Target',
+      cta: 'Book Session',
+      page: 'personal-training',
+      image: '/assets/personal-training.jpg',
+      altText: 'Personal boxing training session'
+    },
+    {
+      id: 'competitive-program',
+      title: 'Competitive Program',
+      description: 'Advanced training for aspiring boxers and competitors.',
+      icon: 'Trophy',
+      cta: 'Learn More',
+      page: 'academy',
+      image: '/assets/competitive.jpg',
+      altText: 'Competitive boxing training'
+    },
+    {
+      id: 'youth-boxing',
+      title: 'Youth Boxing',
+      description: 'Fun and safe programs for young athletes to build confidence.',
+      icon: 'Users',
+      cta: 'Enroll Now',
+      page: 'youth-boxing',
+      image: '/assets/youth-boxing.jpg',
+      altText: 'Youth boxing class'
+    },
+    {
+      id: 'bootcamp',
+      title: 'Boxing Bootcamp',
+      description: 'Intense workouts combining boxing with fitness training.',
+      icon: 'Target',
+      cta: 'Sign Up',
+      page: 'bootcamp',
+      image: '/assets/bootcamp.jpg',
+      altText: 'Boxing bootcamp session'
+    },
+    {
+      id: 'mobile-app',
+      title: 'Mobile Training',
+      description: 'Access training anywhere with our app and virtual sessions.',
+      icon: 'Smartphone',
+      cta: 'Download App',
+      page: 'facilities',
+      image: '/assets/mobile-app.jpg',
+      altText: 'Mobile boxing training app'
+    }
   ];
 
   const defaultTestimonials: Testimonial[] = [
-    // ... (your existing defaultTestimonials array, unchanged)
+    {
+      id: '1',
+      name: 'John Doe',
+      location: 'Dogpatch, SF',
+      quote: 'This gym changed my life. Great coaches and community!',
+      rating: 5,
+      program: 'Group Classes',
+      image: '/assets/john-doe.jpg'
+    },
+    {
+      id: '2',
+      name: 'Jane Smith',
+      location: 'Presidio, SF',
+      quote: 'Excellent personal training. Saw results in weeks.',
+      rating: 5,
+      program: 'Personal Training',
+      image: '/assets/jane-smith.jpg'
+    },
+    {
+      id: '3',
+      name: 'Mike Johnson',
+      location: 'Mission District, SF',
+      quote: 'The competitive program is top-notch. Highly recommend!',
+      rating: 4,
+      program: 'Competitive Program',
+      image: '/assets/mike-johnson.jpg'
+    }
   ];
 
   const displayTestimonials = testimonials.length > 0 ? testimonials : defaultTestimonials;
@@ -245,8 +330,8 @@ export function HomePage({ onNavigate, onBookClass }: HomePageProps) {
                 ))}
               </div>
             )}
-          </section>
-        </div>
+          </div>
+        </section>
       </ErrorBoundary>
     </div>
   );
