@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -208,10 +208,9 @@ export default function ClassesPage({ onNavigate, currentUser }: ClassesPageProp
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                <Tabs مصرف: {
-                  className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-8 min-w-max",
-                  style: { gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }
-                }}
+                <TabsList 
+                  className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-8 min-w-max"
+                  style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}
                 >
                   {classTypes.map((type) => (
                     <TabsTrigger
