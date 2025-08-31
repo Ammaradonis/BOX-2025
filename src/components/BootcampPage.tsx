@@ -1,15 +1,69 @@
 import React, { useState } from 'react';
 import { Calendar, MapPin, Target, TrendingUp, Users, Clock } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from './ImageWithFallback';
+
+// TypeScript interfaces for better type safety
+interface ClassData {
+  id: string;
+  name: string;
+  description: string;
+  level: string;
+  price: number;
+  originalPrice?: number;
+  location?: string;
+}
+
+interface Bootcamp {
+  id: string;
+  name: string;
+  tagline: string;
+  schedule: string;
+  location: string;
+  image: string;
+  altText: string;
+  description: string;
+  intensity: string;
+  duration: number;
+  maxParticipants: number;
+  features: string[];
+  workout: string[];
+  price: number;
+}
+
+interface ProgressionStage {
+  stage: string;
+  title: string;
+  description: string;
+  focus: string;
+}
+
+interface Testimonial {
+  name: string;
+  location: string;
+  bootcamp: string;
+  beforeAfter: {
+    before: string;
+    after: string;
+  };
+  quote: string;
+  image: string;
+}
+
+interface SpecialChallenge {
+  name: string;
+  description: string;
+  details: string[];
+  nextEvent: string;
+}
 
 interface BootcampPageProps {
-  onBookClass: (classData: any) => void;
+  onBookClass: (classData: ClassData) => void;
 }
 
 export function BootcampPage({ onBookClass }: BootcampPageProps) {
   const [selectedBootcamp, setSelectedBootcamp] = useState('sea-cliff');
 
-  const bootcamps = [
+  const bootcamps: Bootcamp[] = [
     {
       id: 'sea-cliff',
       name: 'Sea Cliff Smasher',
@@ -44,7 +98,7 @@ export function BootcampPage({ onBookClass }: BootcampPageProps) {
       tagline: 'Spicy Workouts for the Streets',
       schedule: 'Tuesday & Thursday 6:30 PM',
       location: 'Outdoor - Mission District',
-      image: 'https://images.unsplash.com/photo-1568475754879-c62e646b96f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXRuZXNzJTIwYm9vdGNhbXAlMjBvdXRkb29yJTIwU2FuJTIwRnJhbmNpc2NvfGVufDF8fHx8MTc1NjA5NjQ3NXww&ixlib=rb-4.1.0&q=80&w=1080',
+      image: 'https://images.unsplash.com/photo-1568475754879-c62e646b96f4?crop=entropy&cs=tinysrgbshe=rb-4.1.0&q=80&w=1080',
       altText: 'High-intensity partner circuits in a park with Mission Dolores in background',
       description: 'Tuesday/Thursday 6:30PM – Partner drills that burn like hot salsa.',
       intensity: 'Extreme',
@@ -70,7 +124,7 @@ export function BootcampPage({ onBookClass }: BootcampPageProps) {
 
   const currentBootcamp = bootcamps.find(b => b.id === selectedBootcamp) || bootcamps[0];
 
-  const progressionStages = [
+  const progressionStages: ProgressionStage[] = [
     {
       stage: 'Week 1-2',
       title: 'Post-Holiday "Ghirardelli Gut"',
@@ -91,7 +145,7 @@ export function BootcampPage({ onBookClass }: BootcampPageProps) {
     }
   ];
 
-  const testimonials = [
+  const testimonials: Testimonial[] = [
     {
       name: 'Jennifer L.',
       location: 'Marina District',
@@ -116,7 +170,7 @@ export function BootcampPage({ onBookClass }: BootcampPageProps) {
     }
   ];
 
-  const specialChallenge = {
+  const specialChallenge: SpecialChallenge = {
     name: 'Bay to Bag Challenge',
     description: 'Complete our 6-week bootcamp program and earn entry to this epic SF challenge',
     details: [
@@ -151,12 +205,12 @@ export function BootcampPage({ onBookClass }: BootcampPageProps) {
                 price: 0,
                 originalPrice: 35
               })}
-              className="btn btn-primary text-lg px-8 py-4"
+              className="bg-red-500 text-white font-semibold text-lg px-8 py-4 rounded-lg hover:bg-red-600 transition-colors"
             >
               🔥 FREE TRIAL CLASS
             </button>
             
-            <button className="btn btn-secondary text-lg px-8 py-4">
+            <button className="bg-gray-200 text-gray-900 font-semibold text-lg px-8 py-4 rounded-lg hover:bg-gray-300 transition-colors">
               VIEW BOOTCAMP LOCATIONS
             </button>
           </div>
@@ -195,12 +249,13 @@ export function BootcampPage({ onBookClass }: BootcampPageProps) {
           </div>
 
           {/* Current Bootcamp Details */}
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <div className="relative">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <div className="relative h-96">
               <ImageWithFallback
                 src={currentBootcamp.image}
                 alt={currentBootcamp.altText}
-                className="w-full h-96 object-cover rounded-xl shadow-lg"
+                wrapperClassName="w-full h-96"
+                imgClassName="w-full h-full object-cover rounded-xl shadow-lg"
               />
               
               {/* Location Badge */}
@@ -231,7 +286,7 @@ export function BootcampPage({ onBookClass }: BootcampPageProps) {
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center space-x-2 mb-2">
                     <Clock size={16} className="text-red-600" />
@@ -290,12 +345,12 @@ export function BootcampPage({ onBookClass }: BootcampPageProps) {
                     price: currentBootcamp.price,
                     location: currentBootcamp.location
                   })}
-                  className="btn btn-primary flex-1"
+                  className="bg-red-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-600 transition-colors flex-1"
                 >
                   BOOK {currentBootcamp.name.toUpperCase()} - ${currentBootcamp.price}
                 </button>
                 
-                <button className="btn btn-secondary flex-1">
+                <button className="bg-gray-200 text-gray-900 font-semibold px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors flex-1">
                   VIEW SCHEDULE
                 </button>
               </div>
@@ -351,7 +406,7 @@ export function BootcampPage({ onBookClass }: BootcampPageProps) {
       {/* Bay to Bag Challenge */}
       <section className="py-16 bg-red-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold mb-6">
                 🏃‍♀️ {specialChallenge.name}
@@ -376,7 +431,7 @@ export function BootcampPage({ onBookClass }: BootcampPageProps) {
                 <span className="text-white">{specialChallenge.nextEvent}</span>
               </div>
               
-              <button className="btn bg-white text-red-600 hover:bg-gray-100">
+              <button className="bg-white text-red-600 font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
                 SIGN UP FOR CHALLENGE
               </button>
             </div>
@@ -407,14 +462,15 @@ export function BootcampPage({ onBookClass }: BootcampPageProps) {
             </p>
           </div>
 
-          <div className="sf-grid sf-grid-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="card bg-white">
+              <div key={index} className="bg-white rounded-xl shadow-sm p-6">
                 <div className="flex items-start space-x-4 mb-4">
                   <ImageWithFallback
                     src={testimonial.image}
                     alt={`${testimonial.name} from ${testimonial.location} - bootcamp graduate`}
-                    className="w-16 h-16 rounded-full object-cover"
+                    wrapperClassName="w-16 h-16"
+                    imgClassName="w-full h-full rounded-full object-cover"
                   />
                   
                   <div className="flex-1">

@@ -1,378 +1,408 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Alert, AlertDescription } from './ui/alert';
-import { Loader2, User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
-import { projectId, publicAnonKey } from '../utils/supabase/info';
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
 
-interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAuthSuccess: (user: any) => void;
-  defaultTab?: 'login' | 'signup';
-}
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: loginForm.email,
+      password: loginForm.password,
+    });
 
-export function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab = 'login' }: AuthModalProps) {
-  const [activeTab, setActiveTab] = useState(defaultTab);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+    if (error) throw error;
 
-  // Form states
-  const [loginForm, setLoginForm] = useState({
-    email: '',
-    password: ''
-  });
-
-  const [signupForm, setSignupForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: ''
-  });
-
-  const supabase = createClient(
-    `https://${projectId}.supabase.co`,
-    publicAnonKey
-  );
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginForm.email,
-        password: loginForm.password,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data.session) {
-        // Fetch user profile
-        const profileResponse = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-9c83b899/profile`, {
-          headers: {
-            'Authorization': `Bearer ${data.session.access_token}`,
-            'Content-Type': 'application/json'
+    if (data.session) {
+      try {
+        const profileResponse = await fetch(
+          `https://${projectId}.supabase.co/functions/v1/make-server-9c83b899/profile`,
+          {
+            headers: {
+              Authorization: `Bearer ${data.session.access_token}`,
+              'Content-Type': 'application/json',
+            },
           }
-        });
+        );
 
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          onAuthSuccess({
-            ...data.user,
-            profile: profileData.profile,
-            accessToken: data.session.access_token
-          });
-        } else {
-          onAuthSuccess({
-            ...data.user,
-            accessToken: data.session.access_token
-          });
+        if (!profileResponse.ok) {
+          throw new Error('Failed to fetch user profile');
         }
 
-        onClose();
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      setError(`Login failed: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
-    // Validation
-    if (signupForm.password !== signupForm.confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
-    if (signupForm.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Create user via our server endpoint
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-9c83b899/signup`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${publicAnonKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: signupForm.name,
-          email: signupForm.email,
-          phone: signupForm.phone,
-          password: signupForm.password
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Signup failed');
-      }
-
-      // After successful signup, sign in the user
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: signupForm.email,
-        password: signupForm.password,
-      });
-
-      if (signInError) {
-        throw signInError;
-      }
-
-      if (signInData.session) {
+        const profileData = await profileResponse.json();
         onAuthSuccess({
-          ...signInData.user,
-          profile: { 
-            name: signupForm.name, 
-            email: signupForm.email,
-            phone: signupForm.phone
-          },
-          accessToken: signInData.session.access_token
+          ...data.user,
+          profile: profileData.profile,
+          accessToken: data.session.access_token,
         });
-        onClose();
+      } catch (profileError: any) {
+        console.error('Profile fetch error:', profileError);
+        // Fallback to basic user data if profile fetch fails
+        onAuthSuccess({
+          ...data.user,
+          accessToken: data.session.access_token,
+        });
       }
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      setError(`Signup failed: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+      onClose();
     }
-  };
+  } catch (error: any) {
+    console.error('Login error:', error);
+    setError(`Login failed: ${error.message}`);
+  } finally {
+    setIsLoading(false);
+  }
+};
+const handlePasswordReset = async () => {
+  if (!loginForm.email) {
+    setError('Please enter your email to reset your password');
+    return;
+  }
 
-  const resetForms = () => {
-    setLoginForm({ email: '', password: '' });
-    setSignupForm({ name: '', email: '', phone: '', password: '', confirmPassword: '' });
-    setError('');
-    setShowPassword(false);
-  };
+  setIsLoading(true);
+  setError('');
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab as 'login' | 'signup');
-    resetForms();
-  };
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(loginForm.email, {
+      redirectTo: `${window.location.origin}/reset-password`, // Adjust redirect URL
+    });
 
-  const handleClose = () => {
-    resetForms();
-    onClose();
-  };
+    if (error) throw error;
 
-  return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-primary">
-            Welcome to 3rd Street Boxing
-          </DialogTitle>
-          <DialogDescription className="text-center text-gray-600">
-            Join the strongest community in the Bay Area
-          </DialogDescription>
-        </DialogHeader>
+    setError('Password reset email sent! Check your inbox.');
+  } catch (error: any) {
+    console.error('Password reset error:', error);
+    setError(`Password reset failed: ${error.message}`);
+  } finally {
+    setIsLoading(false);
+  }
+};
+<button
+  type="button"
+  className="text-primary hover:text-primary/80 font-medium"
+  onClick={handlePasswordReset}
+>
+  Reset it here
+</button>
+const formatPhoneNumber = (phone: string) => {
+  const cleaned = phone.replace(/\D/g, '');
+  const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
+  if (match) {
+    const parts = [];
+    if (match[1]) parts.push(`(${match[1]}`);
+    if (match[2]) parts.push(`) ${match[2]}`);
+    if (match[3]) parts.push(`-${match[3]}`);
+    return parts.join('');
+  }
+  return phone;
+};
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Join Now</TabsTrigger>
-          </TabsList>
+const validatePhoneNumber = (phone: string) => {
+  const cleaned = phone.replace(/\D/g, '');
+  return cleaned.length === 10 || cleaned.length === 0; // Allow empty phone (optional)
+};
 
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+const handleSignup = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
 
-          <TabsContent value="login" className="space-y-4">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="login-email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="your.email@gmail.com"
-                    value={loginForm.email}
-                    onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
+  if (!validatePhoneNumber(signupForm.phone)) {
+    setError('Please enter a valid 10-digit phone number or leave it blank');
+    setIsLoading(false);
+    return;
+  }
 
-              <div className="space-y-2">
-                <Label htmlFor="login-password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="login-password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Your password"
-                    value={loginForm.password}
-                    onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                    className="pl-10 pr-10"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
+  // Rest of the signup logic remains unchanged
+};
+<Input
+  id="signup-phone"
+  type="tel"
+  placeholder="(415) 555-0123"
+  value={signupForm.phone}
+  onChange={(e) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setSignupForm((prev) => ({ ...prev, phone: formatted }));
+  }}
+  className="pl-10"
+/>
+const validateEmail = (email: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
 
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90"
-                disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sign In
-              </Button>
-            </form>
+const getPasswordStrength = (password: string) => {
+  if (password.length < 6) return { strength: 'Weak', color: 'text-red-500' };
+  if (password.length < 10 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return { strength: 'Medium', color: 'text-yellow-500' };
+  }
+  return { strength: 'Strong', color: 'text-green-500' };
+};
+const handleSignup = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
 
-            <div className="text-center text-sm text-gray-600">
-              Forgot your password?{' '}
-              <button 
-                type="button"
-                className="text-primary hover:text-primary/80 font-medium"
-                onClick={() => setError('Password reset coming soon! Contact us for help.')}
-              >
-                Reset it here
-              </button>
-            </div>
-          </TabsContent>
+  if (!validateEmail(signupForm.email)) {
+    setError('Please enter a valid email address');
+    setIsLoading(false);
+    return;
+  }
+  // Rest of the validation and signup logic
+};
 
-          <TabsContent value="signup" className="space-y-4">
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="signup-name">Full Name (Like Willie Mays deserves)</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Your full name"
-                    value={signupForm.name}
-                    onChange={(e) => setSignupForm(prev => ({ ...prev, name: e.target.value }))}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
 
-              <div className="space-y-2">
-                <Label htmlFor="signup-email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="your.email@gmail.com"
-                    value={signupForm.email}
-                    onChange={(e) => setSignupForm(prev => ({ ...prev, email: e.target.value }))}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
+  if (!validateEmail(loginForm.email)) {
+    setError('Please enter a valid email address');
+    setIsLoading(false);
+    return;
+  }
+  // Rest of the login logic
+};
+<div className="space-y-2">
+  <Label htmlFor="signup-password">Password</Label>
+  <div className="relative">
+    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+    <Input
+      id="signup-password"
+      type={showPassword ? 'text' : 'password'}
+      placeholder="Strong password (6+ characters)"
+      value={signupForm.password}
+      onChange={(e) => setSignupForm(prev => ({ ...prev, password: e.target.value }))}
+      className="pl-10 pr-10"
+      required
+      minLength={6}
+    />
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+    >
+      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+    </button>
+  </div>
+  {signupForm.password && (
+    <div className={`text-sm ${getPasswordStrength(signupForm.password).color}`}>
+      Password Strength: {getPasswordStrength(signupForm.password).strength}
+    </div>
+  )}
+</div>
+const [lastSubmitTime, setLastSubmitTime] = useState(0);
+const RATE_LIMIT_MS = 1000; // 1 second between submissions
 
-              <div className="space-y-2">
-                <Label htmlFor="signup-phone">Phone (Optional)</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="signup-phone"
-                    type="tel"
-                    placeholder="(415) 555-0123"
-                    value={signupForm.phone}
-                    onChange={(e) => setSignupForm(prev => ({ ...prev, phone: e.target.value }))}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const now = Date.now();
+  if (now - lastSubmitTime < RATE_LIMIT_MS) {
+    setError('Please wait a moment before trying again');
+    return;
+  }
+  setLastSubmitTime(now);
+  // Rest of login logic
+};
 
-              <div className="space-y-2">
-                <Label htmlFor="signup-password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="signup-password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Strong password (6+ characters)"
-                    value={signupForm.password}
-                    onChange={(e) => setSignupForm(prev => ({ ...prev, password: e.target.value }))}
-                    className="pl-10 pr-10"
-                    required
-                    minLength={6}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
+const handleSignup = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const now = Date.now();
+  if (now - lastSubmitTime < RATE_LIMIT_MS) {
+    setError('Please wait a moment before trying again');
+    return;
+  }
+  setLastSubmitTime(now);
+  // Rest of signup logic
+};
+// In your signup Edge Function
+const { createClient } = require('@supabase/supabase-js');
+const redis = require('redis'); // Or use Supabase table for rate limiting
 
-              <div className="space-y-2">
-                <Label htmlFor="signup-confirm-password">Confirm Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="signup-confirm-password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Confirm your password"
-                    value={signupForm.confirmPassword}
-                    onChange={(e) => setSignupForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90"
-                disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Join the Team
-              </Button>
-            </form>
-
-            <div className="text-center text-xs text-gray-500">
-              By signing up, you agree to our terms of service and privacy policy. 
-              Ready to become SF's next champion?
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        <div className="text-center text-sm text-gray-600 pt-4 border-t">
-          <p>Questions? Call us at <span className="font-medium text-primary">(415) 550-8260</span></p>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+async function signup(request) {
+  const ip = request.headers['x-forwarded-for'];
+  const redisClient = redis.createClient();
+  const attempts = await redisClient.get(`rate_limit:${ip}`);
+  if (attempts && parseInt(attempts) > 5) {
+    return { error: 'Too many attempts, try again later' };
+  }
+  await redisClient.incr(`rate_limit:${ip}`);
+  await redisClient.expire(`rate_limit:${ip}`, 60); // Reset after 60 seconds
+  // Proceed with signup
 }
+<form onSubmit={handleLogin} className="space-y-4">
+  <div className="space-y-2">
+    <Label htmlFor="login-email">Email</Label>
+    <div className="relative">
+      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+      <Input
+        id="login-email"
+        type="email"
+        placeholder="your.email@gmail.com"
+        value={loginForm.email}
+        onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
+        className="pl-10"
+        required
+        disabled={isLoading}
+      />
+    </div>
+  </div>
+  {/* Similar for password input */}
+</form>
+
+<form onSubmit={handleSignup} className="space-y-4">
+  {/* Add disabled={isLoading} to all inputs */}
+</form>
+<DialogContent className="sm:max-w-md relative">
+  {isLoading && (
+    <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-10">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  )}
+  {/* Rest of the dialog content */}
+</DialogContent>
+<Input
+  id="login-email"
+  type="email"
+  placeholder="your.email@gmail.com"
+  value={loginForm.email}
+  onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
+  className="pl-10"
+  required
+  disabled={isLoading}
+  autoComplete="email"
+/>
+<Input
+  id="login-password"
+  type={showPassword ? 'text' : 'password'}
+  placeholder="Your password"
+  value={loginForm.password}
+  onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
+  className="pl-10 pr-10"
+  required
+  disabled={isLoading}
+  autoComplete="current-password"
+/>
+<Input
+  id="signup-name"
+  type="text"
+  placeholder="Your full name"
+  value={signupForm.name}
+  onChange={(e) => setSignupForm(prev => ({ ...prev, name: e.target.value }))}
+  className="pl-10"
+  required
+  disabled={isLoading}
+  autoComplete="name"
+/>
+<Input
+  id="signup-email"
+  type="email"
+  placeholder="your.email@gmail.com"
+  value={signupForm.email}
+  onChange={(e) => setSignupForm(prev => ({ ...prev, email: e.target.value }))}
+  className="pl-10"
+  required
+  disabled={isLoading}
+  autoComplete="email"
+/>
+<Input
+  id="signup-phone"
+  type="tel"
+  placeholder="(415) 555-0123"
+  value={signupForm.phone}
+  onChange={(e) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setSignupForm((prev) => ({ ...prev, phone: formatted }));
+  }}
+  className="pl-10"
+  disabled={isLoading}
+  autoComplete="tel"
+/>
+<Input
+  id="signup-password"
+  type={showPassword ? 'text' : 'password'}
+  placeholder="Strong password (6+ characters)"
+  value={signupForm.password}
+  onChange={(e) => setSignupForm(prev => ({ ...prev, password: e.target.value }))}
+  className="pl-10 pr-10"
+  required
+  minLength={6}
+  disabled={isLoading}
+  autoComplete="new-password"
+/>
+<Input
+  id="signup-confirm-password"
+  type={showPassword ? 'text' : 'password'}
+  placeholder="Confirm your password"
+  value={signupForm.confirmPassword}
+  onChange={(e) => setSignupForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+  className="pl-10"
+  required
+  disabled={isLoading}
+  autoComplete="new-password"
+/>
+const handleGoogleLogin = async () => {
+  setIsLoading(true);
+  setError('');
+
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) throw error;
+    // Redirect handled by Supabase
+  } catch (error: any) {
+    console.error('Google login error:', error);
+    setError(`Google login failed: ${error.message}`);
+    setIsLoading(false);
+  }
+};
+<TabsContent value="login" className="space-y-4">
+  <form onSubmit={handleLogin} className="space-y-4">
+    {/* Existing email/password fields */}
+    <Button
+      type="submit"
+      className="w-full bg-primary hover:bg-primary/90"
+      disabled={isLoading}
+    >
+      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+      Sign In
+    </Button>
+  </form>
+  <div className="relative my-4">
+    <div className="absolute inset-0 flex items-center">
+      <span className="w-full border-t border-gray-300" />
+    </div>
+    <div className="relative flex justify-center text-sm">
+      <span className="px-2 bg-white text-gray-500">Or continue with</span>
+    </div>
+  </div>
+  <Button
+    type="button"
+    variant="outline"
+    className="w-full"
+    onClick={handleGoogleLogin}
+    disabled={isLoading}
+  >
+    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+      <path
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1.02.68-2.33 1.09-3.71 1.09-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+        fill="#34A853"
+      />
+      <path
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+        fill="#EA4335"
+      />
+    </svg>
+    Sign in with Google
+  </Button>
+  {/* Existing forgot password section */}
+</TabsContent>

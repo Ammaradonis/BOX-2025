@@ -1,14 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from './ui/button';
-import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Play, Pause, ChevronRight, Target, Users, Trophy } from 'lucide-react';
 
 interface HeroSectionProps {
   onNavigate?: (page: string) => void;
 }
 
+// Simple ImageWithFallback component if not exists
+const ImageWithFallback = ({ src, alt, className }: { src: string; alt: string; className?: string }) => (
+  <img
+    src={src}
+    alt={alt}
+    className={className}
+    loading="lazy"
+    onError={(e) => {
+      e.currentTarget.src = '/fallback-image.jpg'; // Add a fallback image in your public folder
+    }}
+  />
+);
+
 export function HeroSection({ onNavigate }: HeroSectionProps) {
-  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   const testimonials = [
@@ -29,18 +40,21 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
     }
   ];
 
+  // Memoized navigation handler
+  const handleNavigation = useCallback((page: string) => {
+    if (onNavigate) {
+      onNavigate(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [onNavigate]);
+
+  // Optimized testimonial rotation
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
-
-  const handleNavigation = (page: string) => {
-    if (onNavigate) {
-      onNavigate(page);
-    }
-  };
+  }, [testimonials.length]);
 
   return (
     <section 
@@ -48,48 +62,30 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
       role="banner"
       aria-label="Hero section"
     >
-      {/* Background Image/Video Placeholder */}
+      {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <ImageWithFallback
-          src="https://images.unsplash.com/photo-1575747515871-2e323827539e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3hpbmclMjBneW0lMjB0cmFpbmluZyUyMGJheSUyMGJyaWRnZSUyMHNhbiUyMGZyYW5jaXNjb3xlbnwxfHx8fDE3NTYwOTY2MjR8MA&ixlib=rb-4.1.0&q=80&w=1080"
+          src="https://images.unsplash.com/photo-1575747515871-2e323827539e?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3hpbmclMjBneW0lMjB0cmFpbmluZyUyMGJheSUyMGJyaWRnZSUyMHNhbiUyMGZyYW5jaXNjb3xlbnwxfHx8fDE3NTYwOTY2MjR8MA&ixlib=rb-4.1.0&q=80&w=1080"
           alt="Boxers training in 3rd Street Boxing Gym with heavy bags and speed bags, Bay Bridge visible through large industrial windows"
           className="w-full h-full object-cover"
         />
-        {/* Semi-transparent overlay */}
         <div className="absolute inset-0 bg-black/50" />
-        
-        {/* Video Controls Overlay */}
-        <button
-          onClick={() => setIsVideoPlaying(!isVideoPlaying)}
-          className="absolute bottom-6 right-6 z-10 bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
-          aria-label={isVideoPlaying ? "Pause background video" : "Play background video"}
-        >
-          {isVideoPlaying ? (
-            <Pause className="w-5 h-5" />
-          ) : (
-            <Play className="w-5 h-5" />
-          )}
-        </button>
       </div>
 
       {/* Main Content */}
       <div className="relative z-20 container mx-auto px-4 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
-          
-          {/* Main Headline */}
           <div className="space-y-4">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
               WHERE SF'S TOUGHEST
               <br />
               <span className="text-accent">FIND THEIR STRENGTH</span>
             </h1>
-            
             <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto leading-relaxed">
               Authentic Boxing. Real Community. No Frills.
             </p>
           </div>
 
-          {/* Call-to-Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
             <Button
               size="lg"
@@ -99,7 +95,6 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
               <Target className="w-5 h-5 mr-2" />
               CLAIM YOUR 50% OFF FIRST ROUND
             </Button>
-            
             <Button
               variant="outline"
               size="lg"
@@ -111,7 +106,6 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
             </Button>
           </div>
 
-          {/* Secondary CTA */}
           <div className="pt-4">
             <button
               onClick={() => handleNavigation('trainers')}
@@ -136,16 +130,12 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
               </div>
               <span className="text-sm font-medium text-gray-600">5.0 Stars</span>
             </div>
-            
             <blockquote className="text-gray-800 text-sm font-medium mb-3">
               "{testimonials[currentTestimonial].text}"
             </blockquote>
-            
             <cite className="text-sm text-gray-600 not-italic">
               — {testimonials[currentTestimonial].author} | {testimonials[currentTestimonial].location}
             </cite>
-            
-            {/* Testimonial Indicators */}
             <div className="flex justify-center space-x-2 mt-4">
               {testimonials.map((_, index) => (
                 <button
@@ -154,7 +144,7 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
                   className={`w-2 h-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${
                     index === currentTestimonial ? 'bg-accent' : 'bg-gray-300'
                   }`}
-                  aria-label={`View testimonial ${index + 1}`}
+                  aria-label={`Show testimonial from ${testimonials[index].author}`}
                 />
               ))}
             </div>
@@ -173,23 +163,15 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
       </div>
 
       {/* SF-Themed Floating Elements */}
-      <div className="absolute top-20 right-20 z-10 hidden lg:block">
+      <div className="absolute top-20 right-20 z-10 hidden lg:block" aria-hidden="true">
         <div className="text-white/20 text-8xl font-bold transform rotate-12 select-none pointer-events-none">
           SF
         </div>
       </div>
-      
-      <div className="absolute bottom-32 right-12 z-10 hidden lg:block">
+      <div className="absolute bottom-32 right-12 z-10 hidden lg:block" aria-hidden="true">
         <div className="text-accent/30 text-4xl font-bold transform -rotate-12 select-none pointer-events-none">
           SINCE 2005
         </div>
-      </div>
-
-      {/* Accessibility: Text alternative for video */}
-      <div className="sr-only">
-        Background video showing diverse boxers training at 3rd Street Boxing Gym during golden hour, 
-        with Bay Bridge visible through large industrial windows. The video demonstrates the authentic, 
-        community-focused training environment of the gym.
       </div>
     </section>
   );

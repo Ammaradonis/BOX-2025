@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { 
@@ -12,16 +12,24 @@ import {
   Shield,
   Star
 } from 'lucide-react';
+import { Link } from 'react-router-dom'; // Assuming react-router-dom for navigation
 
 interface FooterProps {
-  onNavigate?: (page: string) => void;
-  onNewsletterSignup?: (email: string) => void;
+  onNewsletterSignup?: (email: string) => Promise<void>;
 }
 
-export function Footer({ onNavigate, onNewsletterSignup }: FooterProps) {
+export function Footer({ onNewsletterSignup }: FooterProps) {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
+
+  // Reset submit message after 5 seconds
+  useEffect(() => {
+    if (submitMessage) {
+      const timer = setTimeout(() => setSubmitMessage(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [submitMessage]);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,15 +54,15 @@ export function Footer({ onNavigate, onNewsletterSignup }: FooterProps) {
   };
 
   const quickLinks = [
-    { name: 'Home', key: 'home' },
-    { name: 'Classes', key: 'classes' },
-    { name: 'Academy', key: 'academy' },
-    { name: 'Bootcamp', key: 'bootcamp' },
-    { name: 'Personal Training', key: 'personal-training' },
-    { name: 'Youth Boxing', key: 'youth' },
-    { name: 'Facilities', key: 'facilities' },
-    { name: 'Schedule', key: 'schedule' },
-    { name: 'Contact', key: 'contact' }
+    { name: 'Home', path: '/' },
+    { name: 'Classes', path: '/classes' },
+    { name: 'Academy', path: '/academy' },
+    { name: 'Bootcamp', path: '/bootcamp' },
+    { name: 'Personal Training', path: '/personal-training' },
+    { name: 'Youth Boxing', path: '/youth' },
+    { name: 'Facilities', path: '/facilities' },
+    { name: 'Schedule', path: '/schedule' },
+    { name: 'Contact', path: '/contact' }
   ];
 
   const localSeoKeywords = [
@@ -97,7 +105,7 @@ export function Footer({ onNavigate, onNewsletterSignup }: FooterProps) {
                 <Phone className="w-5 h-5 text-accent flex-shrink-0" aria-hidden="true" />
                 <a 
                   href="tel:+14155508260"
-                  className="hover:text-accent transition-colors duration-200 focus:outline-none focus:text-accent"
+                  className="hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-gray-900 transition-colors duration-200"
                   aria-label="Call us at (415) 550-8260"
                 >
                   (415) 550-8260
@@ -108,7 +116,7 @@ export function Footer({ onNavigate, onNewsletterSignup }: FooterProps) {
                 <Mail className="w-5 h-5 text-accent flex-shrink-0" aria-hidden="true" />
                 <a 
                   href="mailto:info@3rdstreetboxing.com"
-                  className="hover:text-accent transition-colors duration-200 focus:outline-none focus:text-accent"
+                  className="hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-gray-900 transition-colors duration-200"
                   aria-label="Email us at info@3rdstreetboxing.com"
                 >
                   info@3rdstreetboxing.com
@@ -131,14 +139,14 @@ export function Footer({ onNavigate, onNewsletterSignup }: FooterProps) {
             <h3 className="text-xl font-semibold mb-4 text-accent">Navigate</h3>
             <ul role="menu" className="space-y-2">
               {quickLinks.map((link) => (
-                <li key={link.key} role="none">
-                  <button
+                <li key={link.path} role="none">
+                  <Link
+                    to={link.path}
                     role="menuitem"
-                    onClick={() => onNavigate?.(link.key)}
-                    className="text-gray-300 hover:text-white transition-colors duration-200 focus:outline-none focus:text-white"
+                    className="text-gray-300 hover:text-white focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-gray-900 transition-colors duration-200"
                   >
                     {link.name}
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -148,24 +156,24 @@ export function Footer({ onNavigate, onNewsletterSignup }: FooterProps) {
           <div className="space-y-6" role="region" aria-label="Local keywords and badges">
             <h3 className="text-xl font-semibold mb-4 text-accent">SF's Boxing Hub</h3>
             
-            <div className="space-y-2">
+            <ul className="space-y-2" aria-label="Local search keywords">
               {localSeoKeywords.map((keyword, index) => (
-                <span 
+                <li 
                   key={index}
                   className="inline-block text-sm text-gray-400 mr-2 mb-1 px-2 py-1 bg-gray-800 rounded-md"
                 >
                   {keyword}
-                </span>
+                </li>
               ))}
-            </div>
+            </ul>
 
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-1 text-accent">
+                <div className="flex items-center space-x-1 text-accent" aria-label="Rated A+ by Better Business Bureau">
                   <Shield className="w-5 h-5" aria-hidden="true" />
                   <span className="text-sm font-medium">BBB A+ Rating</span>
                 </div>
-                <div className="flex items-center space-x-1 text-accent">
+                <div className="flex items-center space-x-1 text-accent" aria-label="Five star rating on Yelp">
                   <Star className="w-4 h-4 fill-current" aria-hidden="true" />
                   <Star className="w-4 h-4 fill-current" aria-hidden="true" />
                   <Star className="w-4 h-4 fill-current" aria-hidden="true" />
@@ -183,23 +191,29 @@ export function Footer({ onNavigate, onNewsletterSignup }: FooterProps) {
             {/* Social Media */}
             <div className="flex items-center space-x-4">
               <a
-                href="#"
+                href="https://www.facebook.com/3rdstreetboxing"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
                 aria-label="Follow us on Facebook"
-                className="text-gray-400 hover:text-accent transition-colors duration-200 focus:outline-none focus:text-accent"
+                className="text-gray-400 hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-gray-900 transition-colors duration-200"
               >
                 <Facebook className="w-6 h-6" />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/3rdstreetboxing"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
                 aria-label="Follow us on Instagram"
-                className="text-gray-400 hover:text-accent transition-colors duration-200 focus:outline-none focus:text-accent"
+                className="text-gray-400 hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-gray-900 transition-colors duration-200"
               >
                 <Instagram className="w-6 h-6" />
               </a>
               <a
-                href="#"
+                href="https://www.yelp.com/biz/3rd-street-boxing-gym-san-francisco"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
                 aria-label="Read our Yelp reviews"
-                className="text-gray-400 hover:text-accent transition-colors duration-200 focus:outline-none focus:text-accent"
+                className="text-gray-400 hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-gray-900 transition-colors duration-200"
               >
                 <ExternalLink className="w-6 h-6" />
               </a>
@@ -227,23 +241,36 @@ export function Footer({ onNavigate, onNewsletterSignup }: FooterProps) {
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   className="w-full bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-accent focus:ring-accent"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
               
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-accent hover:bg-accent/90 text-black font-medium"
+                className="w-full bg-accent hover:bg-accent/90 text-black font-medium focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-gray-900"
+                aria-live="polite"
               >
-                {isSubmitting ? 'Subscribing...' : 'Subscribe'}
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Subscribing...
+                  </span>
+                ) : (
+                  'Subscribe'
+                )}
               </Button>
               
               {submitMessage && (
                 <p 
                   className={`text-sm ${
-                    submitMessage.includes('Success') ? 'text-green-400' : 'text-red-400'
+                    submitMessage.toLowerCase().includes('success') ? 'text-green-400' : 'text-red-400'
                   }`}
                   role="alert"
+                  aria-live="assertive"
                 >
                   {submitMessage}
                 </p>
@@ -252,12 +279,12 @@ export function Footer({ onNavigate, onNewsletterSignup }: FooterProps) {
 
             <p className="text-xs text-gray-400">
               We respect your privacy. 
-              <button
-                onClick={() => onNavigate?.('privacy')}
-                className="text-accent hover:text-accent/80 ml-1 underline focus:outline-none"
+              <Link
+                to="/privacy"
+                className="text-accent hover:text-accent/80 underline focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-gray-900"
               >
                 Privacy Policy
-              </button>
+              </Link>
             </p>
           </div>
         </div>
@@ -267,12 +294,12 @@ export function Footer({ onNavigate, onNewsletterSignup }: FooterProps) {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-gray-400">
               <p>&copy; 2025 3rd Street Boxing Gym. All rights reserved.</p>
-              <button
-                onClick={() => onNavigate?.('accessibility')}
-                className="text-accent hover:text-accent/80 focus:outline-none focus:text-accent"
+              <Link
+                to="/accessibility"
+                className="text-accent hover:text-accent/80 focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-gray-900"
               >
                 WCAG 2.1 AA Compliant
-              </button>
+              </Link>
             </div>
             
             <div className="text-sm text-gray-500">

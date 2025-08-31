@@ -1,12 +1,11 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
 
 interface Service {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: React.ReactNode; // Safer typing for JSX elements
   cta: string;
   page: string;
   image: string;
@@ -21,26 +20,20 @@ interface ServiceCardProps {
 
 export function ServiceCard({ service, onNavigate, delay = 0 }: ServiceCardProps) {
   return (
-    <div 
-      className="card group cursor-pointer fade-in"
-      style={{ animationDelay: `${delay}s` }}
-      onClick={() => onNavigate(service.page)}
-      role="button"
-      tabIndex={0}
-      aria-label={`Learn more about ${service.title}`}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onNavigate(service.page);
-        }
-      }}
+    <div
+      className="card fade-in bg-white shadow-lg rounded-lg overflow-hidden"
+      style={delay ? { animationDelay: `${delay}s` } : {}}
     >
       {/* Image */}
-      <div className="relative overflow-hidden rounded-lg mb-4 h-48">
-        <ImageWithFallback
+      <div className="relative overflow-hidden rounded-t লg mb-4 h-48">
+        <img
           src={service.image}
           alt={service.altText}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy" // Add lazy loading
+          onError={(e) => {
+            e.currentTarget.src = '/fallback-image.jpg'; // Fallback image
+          }}
         />
         
         {/* Icon Overlay */}
@@ -50,7 +43,7 @@ export function ServiceCard({ service, onNavigate, delay = 0 }: ServiceCardProps
       </div>
 
       {/* Content */}
-      <div className="space-y-3">
+      <div className="p-6 space-y-3">
         <h3 className="text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
           {service.title}
         </h3>
@@ -60,11 +53,15 @@ export function ServiceCard({ service, onNavigate, delay = 0 }: ServiceCardProps
         </p>
         
         <div className="flex items-center justify-between pt-2">
-          <button className="btn btn-ghost group-hover:text-red-600 transition-colors">
+          <button
+            className="btn btn-ghost group-hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
+            onClick={() => onNavigate(service.page)}
+            aria-label={`Learn more about ${service.title}`}
+          >
             {service.cta}
-            <ArrowRight 
-              size={16} 
-              className="ml-2 group-hover:translate-x-1 transition-transform" 
+            <ArrowRight
+              size={16}
+              className="ml-2 group-hover:translate-x-1 transition-transform"
             />
           </button>
         </div>
