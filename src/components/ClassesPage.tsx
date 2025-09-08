@@ -18,7 +18,7 @@ import {
   Heart,
   Sword
 } from 'lucide-react';
-import { projectId, publicAnonKey } from "../../utils/supabase/info.tsx";
+
 
 // TypeScript interfaces
 interface Schedule {
