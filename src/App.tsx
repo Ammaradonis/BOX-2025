@@ -13,7 +13,7 @@ import { SchedulePage } from "./components/SchedulePage";
 import { ContactPage } from "./components/ContactPage";
 import { AuthModal } from "./components/AuthModal";
 import { BookingModal } from "./components/BookingModal";
-import { Toaster } from "../ui/sonner";
+import { Toaster } from "./ui/sonner";
 import { createClient, User } from "@supabase/supabase-js";
 import { projectId, publicAnonKey } from "./utils/supabase/info";
 
