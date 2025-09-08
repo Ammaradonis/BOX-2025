@@ -4,7 +4,7 @@ import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { ImageWithFallback } from '../figma/ImageWithFallback';
+import { ImageWithFallback } from './ImageWithFallback';
 import { 
   Clock, 
   Users, 
@@ -18,7 +18,9 @@ import {
   Heart,
   Sword
 } from 'lucide-react';
-import { projectId, publicAnonKey } from '../../utils/supabase/info';
+import { projectId, publicAnonKey } from "../utils/supabase/info";
+
+
 
 // TypeScript interfaces
 interface Schedule {
@@ -80,7 +82,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetError
 );
 
 // Lazy-loaded components
-const LazyImageWithFallback = lazy(() => import('../figma/ImageWithFallback'));
+const LazyImageWithFallback = lazy(() => import('./ImageWithFallback'));
 
 export default function ClassesPage({ onNavigate, currentUser }: ClassesPageProps) {
   const [activeTab, setActiveTab] = useState('beginner');

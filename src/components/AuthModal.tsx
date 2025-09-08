@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { DialogContent } from '@radix-ui/react-dialog';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/ui/tabs';
+import { Input } from '@/ui/input';
+import { Button } from '@/ui/button';
+import { Label } from '@/ui/label';
 import { Loader2, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react';
 import { supabase } from '@/utils/supabase'; // Assuming supabase client is imported from utils
 
