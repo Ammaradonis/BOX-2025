@@ -18,7 +18,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { projectId, publicAnonKey } from '../../utils/supabase/info';
+import { projectId, publicAnonKey } from "../../utils/supabase/info";
+
 
 // Define TypeScript interfaces
 interface ClassSchedule {

@@ -18,7 +18,8 @@ import {
   Heart,
   Sword
 } from 'lucide-react';
-import { projectId, publicAnonKey } from '../../utils/supabase/info';
+import { projectId, publicAnonKey } from "../../utils/supabase/info";
+
 
 // TypeScript interfaces
 interface Schedule {
