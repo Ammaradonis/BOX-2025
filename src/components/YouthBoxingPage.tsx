@@ -1,6 +1,6 @@
 import React from 'react';
 import { Shield, Users, Clock, Calendar, Star, Heart, Award } from 'lucide-react';
-import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
+import ImageWithFallback from "./ImageWithFallback";
 
 // Define interface for class data
 interface ClassData {

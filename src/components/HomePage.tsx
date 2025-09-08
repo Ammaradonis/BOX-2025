@@ -11,7 +11,7 @@ import {
   Star,
   Quote
 } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from './ImageWithFallback';
 import { TestimonialCard } from './TestimonialCard';
 import { ServiceCard } from './ServiceCard';
 import { projectId, publicAnonKey } from '../utils/supabase/info';

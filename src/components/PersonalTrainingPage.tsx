@@ -6,12 +6,12 @@
 //
 // NOTE: Remove unused Radix UI deps from package.json separately (not in this file).
 // OPTIONAL: Move packages/successStories/localTrainerFallbacks to /config files if you prefer.
-// Ensure ./figma/ImageWithFallback exists and exports `ImageWithFallback` as used below.
+// Ensure ./ImageWithFallback exists and exports `ImageWithFallback` as used below.
 
 import React, { useMemo } from 'react';
 import useSWR from 'swr';
 import { Clock, DollarSign, Star, Target, Award } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from './ImageWithFallback';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 
 // -----------------------------

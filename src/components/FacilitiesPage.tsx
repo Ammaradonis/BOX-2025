@@ -11,7 +11,7 @@ import {
   MapPin,
   Calendar
 } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from './ImageWithFallback';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 
 // Error Boundary Component

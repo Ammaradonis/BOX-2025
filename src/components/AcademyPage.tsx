@@ -1,7 +1,7 @@
 import React, { Component, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Trophy, Target, Calendar, Users, Star, DollarSign } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from './ImageWithFallback';
 
 // TypeScript interfaces
 interface ClassBookingData {

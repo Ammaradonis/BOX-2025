@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
-import { Card, CardContent } from './ui/card';
-import { Button } from './ui/button';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { Card, CardContent } from '../ui/card';
+import { Button } from '../ui/button';
+import ImageWithFallback from "./ImageWithFallback";
 import { ChevronRight, Users, Trophy, Zap, Target, Heart, Dumbbell } from 'lucide-react';
 
 // Error Boundary Component

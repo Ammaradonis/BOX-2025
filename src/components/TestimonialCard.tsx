@@ -3,7 +3,7 @@ import { Star, Quote } from 'lucide-react';
 import PropTypes from 'prop-types';
 
 // Lazy load ImageWithFallback for better performance
-const ImageWithFallback = lazy(() => import('./figma/ImageWithFallback'));
+const ImageWithFallback = lazy(() => import('./ImageWithFallback'));
 
 interface Testimonial {
   id: string;

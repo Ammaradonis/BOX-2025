@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { Play, Pause, ChevronRight, Target, Users, Trophy } from 'lucide-react';
 
 interface HeroSectionProps {
