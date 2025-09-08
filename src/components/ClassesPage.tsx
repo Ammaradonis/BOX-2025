@@ -80,7 +80,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetError
 );
 
 // Lazy-loaded components
-const LazyImageWithFallback = lazy(() => import('../figma/ImageWithFallback'));
+const LazyImageWithFallback = lazy(() => import('./ImageWithFallback'));
 
 export default function ClassesPage({ onNavigate, currentUser }: ClassesPageProps) {
   const [activeTab, setActiveTab] = useState('beginner');
