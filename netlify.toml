@@ -2,12 +2,12 @@
 
 [build]
   command = "npm run build"
-  publish = "dist"
+  publish = "build"
 
 [dev]
   command = "npm run dev"
   port = 3000
-  publish = "dist"
+  publish = "build"
 
 [build.environment]
   NODE_VERSION = "20"
