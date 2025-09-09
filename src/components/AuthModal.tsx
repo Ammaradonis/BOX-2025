@@ -5,7 +5,7 @@ import { Input } from '@/ui/input';
 import { Button } from '@/ui/button';
 import { Label } from '@/ui/label';
 import { Loader2, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react';
-import { supabase } from '@/utils/supabase'; // Assuming supabase client is imported from utils
+import { supabase } from '@/lib/supabaseClient'; // Assuming supabase client is imported from utils
 
 interface AuthModalProps {
   onClose: () => void;
