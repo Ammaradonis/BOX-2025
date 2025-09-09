@@ -82,3 +82,5 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
     </div>
   );
 };
+
+export default ImageWithFallback;
