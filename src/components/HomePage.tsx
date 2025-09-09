@@ -357,6 +357,3 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-export default function HomePage() {
-  return <div>...</div>;
-}

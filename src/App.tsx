@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import HomePage from "./components/HomePage";
+import { HomePage } from "./components/HomePage";
 import ClassesPage from "./components/ClassesPage";
 import AcademyPage from "./components/AcademyPage";
 import BootcampPage from "./components/BootcampPage";
