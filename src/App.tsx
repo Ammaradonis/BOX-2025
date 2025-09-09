@@ -4,7 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { HomePage } from "./components/HomePage";
 import ClassesPage from "./components/ClassesPage";
-import AcademyPage from "./components/AcademyPage";
+import { AcademyPage } from "./components/AcademyPage";
 import BootcampPage from "./components/BootcampPage";
 import PersonalTrainingPage from "./components/PersonalTrainingPage";
 import YouthBoxingPage from "./components/YouthBoxingPage";
