@@ -13,7 +13,7 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
-    outDir: 'build', // Netlify serves this as the publish directory
+    outDir: 'dist', // Netlify serves this as the publish directory
     emptyOutDir: true,
   },
   server: {
