@@ -72,7 +72,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "dist": "vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit && echo '✓ TypeScript check passed'"
   },
