@@ -23,9 +23,8 @@ import {
 import { toast } from 'sonner';
 
 // Environment variables should be set in Netlify dashboard
-const projectId = process.env.REACT_APP_SUPABASE_PROJECT_ID || import.meta.env.VITE_SUPABASE_PROJECT_ID;
-const publicAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
-
+const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+const publicAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Form validation schema
 const schema = yup.object({
   name: yup.string().required('Name is required').min(2, 'Name must be at least 2 characters'),

@@ -1,2 +1,7 @@
-export const projectId = "msqajzusuyrjyqjipzjy"
-export const publicAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zcWFqenVzdXlyanlxamlwemp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MTc5ODgsImV4cCI6MjA3MjA5Mzk4OH0.mR6yajOmYL2LEmhZMfQOKhaEvFTHo3Nm7Dp3a86rh98"
+// ./utils/supabase/info.ts
+export const projectId = "msqajzusuyrjyqjipzjy";
+
+export const publicAnonKey =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zcWFqenVzdXlyanlxamlwemp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MTc5ODgsImV4cCI6MjA3MjA5Mzk4OH0.mR6yajOmYL2LEmhZMfQOKhaEvFTHo3Nm7Dp3a86rh98";
+
+export const supabaseUrl = "https://msqajzusuyrjyqjipzjy.supabase.co";

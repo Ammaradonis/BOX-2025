@@ -1,26 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '../ui/button';
 import { Play, Pause, ChevronRight, Target, Users, Trophy } from 'lucide-react';
+import { ImageWithFallback } from '../components/ImageWithFallback'; // Import the proper component
 
 interface HeroSectionProps {
   onNavigate?: (page: string) => void;
 }
 
-// Simple ImageWithFallback component if not exists
-const ImageWithFallback = ({ src, alt, className }: { src: string; alt: string; className?: string }) => (
-  <img
-    src={src}
-    alt={alt}
-    className={className}
-    loading="lazy"
-    onError={(e) => {
-      e.currentTarget.src = '/fallback-image.jpg'; // Add a fallback image in your public folder
-    }}
-  />
-);
-
 export function HeroSection({ onNavigate }: HeroSectionProps) {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
 
   const testimonials = [
     {
@@ -48,6 +37,11 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
     }
   }, [onNavigate]);
 
+  // Toggle video playback
+  const toggleVideoPlayback = () => {
+    setIsVideoPlaying(!isVideoPlaying);
+  };
+
   // Optimized testimonial rotation
   useEffect(() => {
     const interval = setInterval(() => {
@@ -62,14 +56,35 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
       role="banner"
       aria-label="Hero section"
     >
-      {/* Background Image */}
+      {/* Background Video with Fallback */}
       <div className="absolute inset-0 z-0">
-        <ImageWithFallback
-          src="https://images.unsplash.com/photo-1575747515871-2e323827539e?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3hpbmclMjBneW0lMjB0cmFpbmluZyUyMGJheSUyMGJyaWRnZSUyMHNhbiUyMGZyYW5jaXNjb3xlbnwxfHx8fDE3NTYwOTY2MjR8MA&ixlib=rb-4.1.0&q=80&w=1080"
-          alt="Boxers training in 3rd Street Boxing Gym with heavy bags and speed bags, Bay Bridge visible through large industrial windows"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="relative w-full h-full">
+          {/* Video element with controls for accessibility */}
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="w-full h-full object-cover"
+            poster="/hero-poster.jpg" // This should be in public folder
+            aria-label="Boxing gym training video"
+          >
+            <source src="/hero-video.mp4" type="video/mp4" /> {/* This should be in public folder */}
+            Your browser does not support the video tag.
+          </video>
+          
+          {/* Video overlay and fallback if video fails to load */}
+          <div className="absolute inset-0 bg-black/50" />
+          
+          {/* Video controls */}
+          <button
+            onClick={toggleVideoPlayback}
+            className="absolute bottom-4 right-4 z-30 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
+            aria-label={isVideoPlaying ? "Pause video" : "Play video"}
+          >
+            {isVideoPlaying ? <Pause size={20} /> : <Play size={20} />}
+          </button>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -118,6 +133,7 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
         </div>
       </div>
 
+      {/* Rest of your component remains the same... */}
       {/* Floating Testimonial */}
       <div className="absolute bottom-8 left-8 right-8 z-20">
         <div className="max-w-md mx-auto lg:mx-0 lg:max-w-lg">
