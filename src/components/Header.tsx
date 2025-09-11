@@ -1,7 +1,7 @@
 // src/components/Header.tsx
 import React from "react";
 import { Button } from "../ui/button"; // Adjust path if needed
-import type { User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabaseClient";
 
 interface HeaderProps {
   currentPage: string;

@@ -14,14 +14,9 @@ import ContactPage from "./components/ContactPage";
 import AuthModal from "./components/AuthModal";
 import { BookingModal } from "./components/BookingModal";
 import { Toaster } from "./ui/sonner";
-import { createClient, User } from "@supabase/supabase-js";
+import { supabase } from "./lib/supabaseClient";
 import { projectId, publicAnonKey } from "./utils/supabase/info";
 
-// Supabase client instance
-const supabase = createClient(
-  `https://${projectId}.supabase.co`,
-  publicAnonKey
-);
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<string>("home");

@@ -1,23 +1,38 @@
-// server.ts
 import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as kv from "./kv_store.tsx";
 
 // --- App Setup ---
 const app = new Hono();
 
-// Enable CORS and request logging
+// Explicit CORS setup
 app.use(
   "*",
   cors({
-    origin: "*",
+    origin: "https://box-2025-pegi.vercel.app", // restrict to your Vercel domain (or "*")
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "apikey",
+      "x-client-info",
+    ],
   })
 );
+
 app.use("*", logger());
+
+// --- Handle OPTIONS globally ---
+app.options("*", (c) => {
+  return c.text("ok", 200, {
+    "Access-Control-Allow-Origin": "https://box-2025-pegi.vercel.app",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers":
+      "Content-Type, Authorization, apikey, x-client-info",
+  });
+});
 
 // --- Supabase Client ---
 const supabase = createClient(
