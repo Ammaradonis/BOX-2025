@@ -1,9 +1,8 @@
-// src/components/Toaster.jsx
 import React from "react";
 import { Toaster as Sonner, ToasterProps } from "sonner";
 import { useTheme } from '../context/ThemeContext';
 
-const Toaster = ({ ...props }) => {
+const Toaster = (props: ToasterProps) => {
   const { theme } = useTheme();
 
   return (
