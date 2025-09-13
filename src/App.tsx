@@ -6,6 +6,7 @@
 */
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import ReactDOM from "react-dom/client";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import confetti from "canvas-confetti";
 import { formatInTimeZone } from "date-fns-tz";
