@@ -12,9 +12,12 @@ import { formatInTimeZone } from "date-fns-tz";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <HelmetProvider> {/* <-- wrap here */}
+    <HelmetProvider>
+      <MergedDemoApp /> {/* Your main app goes here */}
+    </HelmetProvider>
   </React.StrictMode>
 );
+
 
 /* Minimal icon placeholders (replace with lucide-react if available) */
 const Icon = ({ children }: any) => <span>{children}</span>;
