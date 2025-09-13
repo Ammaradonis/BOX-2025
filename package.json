@@ -54,6 +54,7 @@
     "swr": "^2.2.4",
     "tailwind-merge": "^2.3.0",
     "vaul": "^1.1.2",
+    "canvas-confetti": "^1.9.2",
     "yup": "^1.4.0"
   },
   "devDependencies": {
@@ -64,6 +65,7 @@
     "@types/react-helmet": "^6.1.8",
     "@vitejs/plugin-react": "^4.3.2",
     "@vitejs/plugin-react-swc": "^4.0.1",
+    "@types/canvas-confetti": "^1.9.0",
     "autoprefixer": "^10.4.20",
     "cross-env": "^10.0.0",
     "postcss": "^8.4.49",
