@@ -55,9 +55,11 @@ const SCHEDULE: ScheduleSlot[] = [
    Utilities
    ----------------------------- */
 const triggerConfetti = () => {
-  if (typeof document === "undefined") return; // avoid SSR/early calls
-  confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+  const c = document.createElement("canvas");
+  document.body.appendChild(c);
+  confetti.create(c, { resize: true })({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
 };
+
 
 
 const fakePaymentProcess = async (card: { number: string; expiry: string; cvv: string }) => {
