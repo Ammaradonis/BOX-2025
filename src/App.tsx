@@ -11,14 +11,6 @@ import { Helmet, HelmetProvider } from "react-helmet-async";
 import confetti from "canvas-confetti";
 import { formatInTimeZone } from "date-fns-tz";
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <HelmetProvider>
-      <MergedDemoApp /> {/* Your main app goes here */}
-    </HelmetProvider>
-  </React.StrictMode>
-);
-
 
 /* Minimal icon placeholders (replace with lucide-react if available) */
 const Icon = ({ children }: any) => <span>{children}</span>;
@@ -631,3 +623,11 @@ export default function MergedDemoApp() {
     </FogWrapper>
   );
 }
+
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <React.StrictMode>
+    <HelmetProvider>
+      <MergedDemoApp /> {/* Your main app goes here */}
+    </HelmetProvider>
+  </React.StrictMode>
+);
