@@ -13,10 +13,6 @@ import { formatInTimeZone } from "date-fns-tz";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <HelmetProvider> {/* <-- wrap here */}
-      <ThemeProvider>
-        <Root />
-      </ThemeProvider>
-    </HelmetProvider>
   </React.StrictMode>
 );
 
