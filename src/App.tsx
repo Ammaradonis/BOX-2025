@@ -54,8 +54,11 @@ const SCHEDULE: ScheduleSlot[] = [
 /* -----------------------------
    Utilities
    ----------------------------- */
-const triggerConfetti = () =>
+const triggerConfetti = () => {
+  if (typeof document === "undefined") return; // avoid SSR/early calls
   confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+};
+
 
 const fakePaymentProcess = async (card: { number: string; expiry: string; cvv: string }) => {
   // UI-only fake payments flow (simulated latency)
