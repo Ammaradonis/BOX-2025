@@ -624,10 +624,3 @@ export default function MergedDemoApp() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <HelmetProvider>
-      <MergedDemoApp /> {/* Your main app goes here */}
-    </HelmetProvider>
-  </React.StrictMode>
-);
