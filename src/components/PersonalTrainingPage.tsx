@@ -154,47 +154,80 @@ function generateSyntheticTestimonial(overrides: Partial<Testimonial> = {}): Tes
    Mock Data: premium trainers
    ============================ */
 
+// Replace static trainer data with more realistic and detailed information
 const PREMIUM_TRAINERS: TrainerProfile[] = [
   {
     id: "t-elena",
     name: "Elena Garcia",
-    bio: "Strength & conditioning specialist, Olympic-level technique training.",
-    specialties: ["strength", "conditioning", "technique"],
+    bio: "Former Olympic boxing coach with 15+ years experience training champions. Specializes in strength conditioning and technical precision.",
+    specialties: ["Olympic technique", "strength training", "footwork"],
     rating: 4.9,
     hourlyRate: 150,
-    availability: [
-      { day: "2025-09-16", time: "09:00:00", duration: 60 },
-      { day: "2025-09-18", time: "18:00:00", duration: 60 },
-    ],
+    certification: "NSCA-CSCS, USA Boxing Level 4",
+    yearsExperience: 15,
+    photoUrl: "/trainers/elena-garcia.jpg", // Add real photos
+    availability: generateRealisticAvailability(7), // Dynamic future dates
     celebrity: false,
+    achievements: ["2016 Olympic Coach", "5x Golden Gloves Champion"]
   },
   {
     id: "t-omar",
     name: "Omar Qureshi",
-    bio: "Former pro fighter and tactical sparring coach.",
+    bio: "Former pro fighter with 20+ professional bouts. Tactical sparring coach focused on fight IQ, defense, and adaptive strategies.",
     specialties: ["sparring", "fight IQ", "defense"],
     rating: 4.95,
     hourlyRate: 200,
-    availability: [
-      { day: "2025-09-16", time: "18:00:00", duration: 75 },
-      { day: "2025-09-20", time: "19:00:00", duration: 60 },
-    ],
+    certification: "Certified Tactical Combat Coach",
+    yearsExperience: 18,
+    photoUrl: "/trainers/omar-qureshi.jpg",
+    availability: generateRealisticAvailability(5),
     celebrity: true,
+    achievements: ["WBC Continental Title Holder", "Trained UFC featherweight contenders"]
   },
   {
     id: "t-raul",
     name: "Raúl Mendes",
-    bio: "Precision striking and mobility; rehab-aware programming.",
+    bio: "Precision striking coach with a strong background in mobility and sports rehabilitation. Helps athletes build efficient, injury-free movement patterns.",
     specialties: ["technique", "mobility", "rehab"],
     rating: 4.8,
     hourlyRate: 140,
-    availability: [
-      { day: "2025-09-16", time: "19:30:00", duration: 45 },
-      { day: "2025-09-22", time: "07:30:00", duration: 60 },
-    ],
+    certification: "NASM-CES, Certified Striking Coach",
+    yearsExperience: 12,
+    photoUrl: "/trainers/raul-mendes.jpg",
+    availability: generateRealisticAvailability(6),
     celebrity: false,
+    achievements: ["Rehab specialist for La Liga athletes", "Founder of Precision Striking Academy"]
   },
+  {
+    id: "t-maya",
+    name: "Maya Chen",
+    bio: "Sports scientist and conditioning coach with a PhD in biomechanics. Blends research-driven training with elite boxing programs.",
+    specialties: ["biomechanics", "conditioning", "injury prevention"],
+    rating: 4.97,
+    hourlyRate: 220,
+    certification: "PhD Biomechanics, ACSM-CPT",
+    yearsExperience: 10,
+    photoUrl: "/trainers/maya-chen.jpg",
+    availability: generateRealisticAvailability(4),
+    celebrity: false,
+    achievements: ["Lead researcher at HK Sports Institute", "Strength coach for world champion boxer"]
+  },
+  {
+    id: "t-luis",
+    name: "Luis Ortega",
+    bio: "Celebrity boxing trainer known for coaching actors and musicians preparing for major roles and events. Focuses on fast transformations and performance coaching.",
+    specialties: ["celebrity training", "conditioning", "boxing for performance"],
+    rating: 4.85,
+    hourlyRate: 300,
+    certification: "ISSA Elite Trainer, Boxing Performance Specialist",
+    yearsExperience: 20,
+    photoUrl: "/trainers/luis-ortega.jpg",
+    availability: generateRealisticAvailability(3),
+    celebrity: true,
+    achievements: ["Trainer for Netflix action stars", "Featured on ESPN Training Camp"]
+  }
 ];
+
 
 /* ============================
    Small shared styles (inline)
