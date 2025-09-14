@@ -11,7 +11,11 @@ interface Testimonial {
   location?: string; // <-- make optional
   quote: string;
   rating: number;
+<<<<<<< HEAD
   program?: string;
+=======
+  program?: string; // <-- optional now
+>>>>>>> 4ef6f17c90cf1de1144adf820840529de4cb3fdd
   image?: string;
 }
 
@@ -105,8 +109,14 @@ TestimonialCard.propTypes = {
     location: PropTypes.string, // <-- no longer required
     quote: PropTypes.string.isRequired,
     rating: PropTypes.number.isRequired,
+<<<<<<< HEAD
     program: PropTypes.string,
     image: PropTypes.string,
   }).isRequired,
   delay: PropTypes.number,
+=======
+    program: PropTypes.string, // <-- remove .isRequired
+    image: PropTypes.string,
+  }).isRequired,
+>>>>>>> 4ef6f17c90cf1de1144adf820840529de4cb3fdd
 };
