@@ -1,13 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Root from "./Root";
-import { ThemeProvider } from "./context/ThemeContext";
+import { HelmetProvider } from "react-helmet-async";
+import MergedDemoApp from "./App";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <Root />
-    </ThemeProvider>
+    <HelmetProvider>
+      <MergedDemoApp />
+    </HelmetProvider>
   </React.StrictMode>
 );

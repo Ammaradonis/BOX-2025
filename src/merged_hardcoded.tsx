@@ -6,9 +6,11 @@
 */
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { Helmet } from "react-helmet-async";
+import ReactDOM from "react-dom/client";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import confetti from "canvas-confetti";
 import { formatInTimeZone } from "date-fns-tz";
+
 
 /* Minimal icon placeholders (replace with lucide-react if available) */
 const Icon = ({ children }: any) => <span>{children}</span>;
@@ -54,8 +56,13 @@ const SCHEDULE: ScheduleSlot[] = [
 /* -----------------------------
    Utilities
    ----------------------------- */
-const triggerConfetti = () =>
-  confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+const triggerConfetti = () => {
+  const c = document.createElement("canvas");
+  document.body.appendChild(c);
+  confetti.create(c, { resize: true })({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+};
+
+
 
 const fakePaymentProcess = async (card: { number: string; expiry: string; cvv: string }) => {
   // UI-only fake payments flow (simulated latency)
