@@ -62,22 +62,13 @@ type ProgressAssessment = {
   points?: number;
 };
 
-type Booking = {
-  id: string;
-  session: TrainingSession;
-  createdAt: string;
-  paymentId?: string;
-  status: "pending" | "confirmed" | "failed";
-};
-
-type PaymentResult = {
-  id: string;
-  status: "succeeded" | "failed";
-  receipt?: string;
+type Subscription = {
+  trainer: string;
+  subscriptionID: string;
 };
 
 /* ============================
-   Utilities: localStorage, analytics, confetti, fake payments
+   Utilities: localStorage, analytics, confetti
    ============================ */
 
 const saveToLS = (k: string, v: any) => {
@@ -121,22 +112,6 @@ const triggerConfetti = (options: any = {}) => {
   } catch {
     // confetti lib missing -> noop
   }
-};
-
-const fakePaymentProcess = async (card: {
-  number: string;
-  expiry: string;
-  cvv: string;
-}): Promise<PaymentResult> => {
-  // Simulated latency & basic validation
-  await new Promise((r) => setTimeout(r, 900));
-  const normalized = card.number.replace(/\s/g, "");
-  if (normalized.length < 12) throw new Error("Card declined");
-  return {
-    id: `charge_${Date.now()}`,
-    status: "succeeded",
-    receipt: `RECEIPT-${Date.now()}`,
-  };
 };
 
 /* ============================
@@ -452,7 +427,6 @@ const SessionBuilder: React.FC<{
       focusAreas,
       intensity,
       notes,
-      price: Math.round((durationMinutes / 60) * (trainers.find((t) => t.id === trainerId)?.hourlyRate || 150)),
     };
     analyticsTrack("session_created", { trainerId, durationMinutes, focusAreas, intensity });
     onCreate(session);
@@ -547,163 +521,12 @@ const SessionBuilder: React.FC<{
       </label>
 
       <div style={{ marginTop: 12, display: "flex", gap: 8, alignItems: "center" }}>
-        <button onClick={create} style={styles.primaryBtn} aria-label="Create session">
-          Create session
+        <button onClick={create} style={styles.primaryBtn} aria-label="Schedule session">
+          Schedule session
         </button>
-        <div style={{ color: "#6b7280" }}>
-          Estimated price:{" "}
-          <strong>
-            $
-            {Math.round((durationMinutes / 60) *
-              (trainers.find((t) => t.id === trainerId)?.hourlyRate || 150))}
-          </strong>
-        </div>
       </div>
     </div>
   );
-};
-
-/* ============================
-   BookingModal (premium)
-   - Enhanced payment processing simulation and confirmation
-   ============================ */
-
-const BookingModal: React.FC<{
-  open: boolean;
-  session?: TrainingSession | null;
-  onClose: () => void;
-  onConfirmed: (booking: Booking) => void;
-}> = ({ open, session, onClose, onConfirmed }) => {
-  const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (open) {
-      analyticsTrack("booking_modal_opened", { sessionId: session?.id });
-    }
-  }, [open, session]);
-
-  const handlePayment = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      setError(null);
-      if (!session) return;
-      const form = e.target as any;
-      const card = {
-        number: form.cardnumber.value,
-        expiry: form.exp.value,
-        cvv: form.cvv.value,
-      };
-      setProcessing(true);
-      analyticsTrack("booking_attempt", { sessionId: session.id });
-      try {
-        const res = await fakePaymentProcess(card);
-        const booking: Booking = {
-          id: `bk_${Date.now()}`,
-          session,
-          createdAt: new Date().toISOString(),
-          paymentId: res.id,
-          status: res.status === "succeeded" ? "confirmed" : "failed",
-        };
-        const bookings = loadFromLS<Booking[]>("pt_bookings", []);
-        saveToLS("pt_bookings", [booking, ...bookings].slice(0, 50));
-        triggerConfetti();
-        scheduleBrowserNotification("Booking Confirmed", {
-          body: `${session.focusAreas.join(", ")} with ${session.trainerId}`,
-        });
-        analyticsTrack("booking_confirmed", { bookingId: booking.id, paymentId: res.id });
-        onConfirmed(booking);
-        onClose();
-      } catch (err: any) {
-        setError(err.message || "Payment failed");
-        analyticsTrack("booking_failed", { reason: err?.message || "unknown" });
-      } finally {
-        setProcessing(false);
-      }
-    },
-    [session, onConfirmed, onClose]
-  );
-
-  if (!open || !session) return null;
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Premium booking dialog"
-      style={{
-        position: "fixed",
-        inset: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.5)",
-        zIndex: 9999,
-        padding: 12,
-      }}
-    >
-      <div style={{ width: 520, background: "#fff", borderRadius: 12, padding: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 18 }}>Confirm Premium Session</div>
-            <div style={{ fontSize: 13, color: "#6b7280" }}>{session.focusAreas.join(" • ")} • {session.durationMinutes}m</div>
-          </div>
-          <div>
-            <button onClick={onClose} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 18 }} aria-label="Close booking dialog">
-              ✕
-            </button>
-          </div>
-        </div>
-
-        <form onSubmit={handlePayment}>
-          <div style={{ marginBottom: 8 }}>
-            <label style={{ display: "block", fontSize: 13, fontWeight: 700 }}>Card number</label>
-            <input name="cardnumber" placeholder="4242 4242 4242 4242" style={styles.input} required />
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700 }}>Expiry</label>
-              <input name="exp" placeholder="MM/YY" style={styles.input} required />
-            </div>
-            <div style={{ width: 120 }}>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700 }}>CVV</label>
-              <input name="cvv" placeholder="123" style={styles.input} required />
-            </div>
-          </div>
-
-          {error && <div style={{ color: "#dc2626", marginTop: 8 }}>{error}</div>}
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
-            <div>
-              <div style={{ fontSize: 13, color: "#6b7280" }}>Total</div>
-              <div style={{ fontWeight: 800, fontSize: 18 }}>${session.price?.toFixed(2) || "0.00"}</div>
-            </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button type="submit" disabled={processing} style={{ ...styles.primaryBtn, opacity: processing ? 0.6 : 1 }}>
-                {processing ? "Processing…" : "Pay & Book"}
-              </button>
-              <button type="button" onClick={onClose} style={styles.secondaryBtn}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-/* small helper for notifications scheduling (reused) */
-const scheduleBrowserNotification = (title: string, opts: NotificationOptions & { delayMs?: number } = {}) => {
-  const delay = opts.delayMs || 0;
-  if (!("Notification" in window)) return;
-  if (Notification.permission === "granted") {
-    setTimeout(() => new Notification(title, opts), delay);
-  } else if (Notification.permission !== "denied") {
-    Notification.requestPermission().then((p) => {
-      if (p === "granted") setTimeout(() => new Notification(title, opts), delay);
-    });
-  }
 };
 
 /* ============================
@@ -840,11 +663,17 @@ export default function PersonalTrainingPage(): JSX.Element {
     () => loadFromLS<Testimonial[]>("pt_testimonials", [generateSyntheticTestimonial({ name: "Sophie M.", quote: "This program changed my life!" })])
   );
 
+  const [sessions, setSessions] = useState<TrainingSession[]>(() => loadFromLS<TrainingSession[]>("pt_sessions", []));
   const [draftSession, setDraftSession] = useState<TrainingSession | null>(() => loadFromLS("pt_last_session", null));
-  const [bookingOpen, setBookingOpen] = useState(false);
-
-  const [bookings, setBookings] = useState<Booking[]>(() => loadFromLS<Booking[]>("pt_bookings", []));
+  const [subscription, setSubscription] = useState<Subscription | null>(() => loadFromLS("subscription", null));
+  const isSubscribed = !!subscription;
   const [userId] = useState<string>("demo-user-pt");
+
+  const planIds: { [key: string]: string } = {
+    "t-elena": "P-0XA82551G4482814TNCYGEIQ",
+    "t-omar": "P-38366759K40412012NCYGJJY",
+    "t-raul": "P-37M89752833316030NCYGNPA",
+  };
 
   // persist selections
   useEffect(() => saveToLS("pt_selected_trainer", selectedTrainerId), [selectedTrainerId]);
@@ -857,23 +686,44 @@ export default function PersonalTrainingPage(): JSX.Element {
     analyticsTrack("pt_page_loaded", { ts: new Date().toISOString() });
   }, []);
 
+  const handleSubscribe = useCallback((trainerName: string, subID: string) => {
+    const sub = { trainer: trainerName, subscriptionID: subID };
+    saveToLS("subscription", sub);
+    setSubscription(sub);
+    triggerConfetti();
+    alert(`Subscribed to ${trainerName}!`);
+  }, []);
+
+  useEffect(() => {
+    if (!window.paypal) return;
+    trainers.forEach((trainer) => {
+      const planId = planIds[trainer.id];
+      if (!planId) return;
+      window.paypal.Buttons({
+        style: { shape: 'pill', color: 'gold', layout: 'vertical', label: 'subscribe' },
+        createSubscription: (data, actions) => actions.subscription.create({ plan_id: planId }),
+        onApprove: (data, actions) => handleSubscribe(trainer.name, data.subscriptionID),
+      }).render(`#paypal-button-container-${planId}`);
+    });
+  }, [trainers, handleSubscribe, planIds]);
+
   const selectTrainer = useCallback((tid: string) => {
     setSelectedTrainerId(tid);
     analyticsTrack("trainer_selected", { trainerId: tid });
   }, []);
 
   const createSession = useCallback((s: TrainingSession) => {
+    if (!isSubscribed) {
+      alert("Please subscribe to a premium trainer first.");
+      return;
+    }
     setDraftSession(s);
-    analyticsTrack("session_draft_saved", { sessionId: s.id });
-    // open booking modal automatically for premium UX
-    setBookingOpen(true);
-  }, []);
-
-  const confirmBooking = useCallback((b: Booking) => {
-    setBookings((prev) => [b, ...prev].slice(0, 50));
-    analyticsTrack("booking_recorded", { bookingId: b.id });
-    saveToLS("pt_bookings", [b, ...loadFromLS("pt_bookings", [])]);
-  }, []);
+    const updatedSessions = [s, ...sessions];
+    setSessions(updatedSessions);
+    saveToLS("pt_sessions", updatedSessions);
+    triggerConfetti();
+    analyticsTrack("session_scheduled", { sessionId: s.id });
+  }, [isSubscribed, sessions]);
 
   const addSynthetic = useCallback(() => {
     const t = generateSyntheticTestimonial();
@@ -906,9 +756,16 @@ export default function PersonalTrainingPage(): JSX.Element {
 
   const selectedTrainer = useMemo(() => trainers.find((t) => t.id === selectedTrainerId) || null, [trainers, selectedTrainerId]);
 
+  const paywallMessage = (
+    <div style={{ padding: 12, borderRadius: 10, background: "#fff" }}>
+      Please subscribe to a premium trainer to access this feature.
+    </div>
+  );
+
   return (
     <div style={styles.page}>
       <Helmet>
+        <script src="https://www.paypal.com/sdk/js?client-id=Aa_Q-b8Ey9eMTCZ-nrD44nVFKMbPmkeNCu4jSSNPQUdLq92W7kMB_RY3xSdQCpg66RrpPV8pgLZTIboZ&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
         <title>3rd Street Boxing — Premium Personal Training</title>
       </Helmet>
 
@@ -954,27 +811,7 @@ export default function PersonalTrainingPage(): JSX.Element {
                         >
                           {selectedTrainerId === t.id ? "Selected" : "Select"}
                         </button>
-                        <button
-                          onClick={() => {
-                            // quick book first availability stub
-                            const avail = t.availability[0];
-                            const s: TrainingSession = {
-                              id: `quick_${Date.now()}`,
-                              trainerId: t.id,
-                              durationMinutes: avail.duration,
-                              focusAreas: t.specialties.slice(0, 2),
-                              intensity: "high",
-                              scheduledAt: `${avail.day}T${avail.time}`,
-                              price: Math.round((avail.duration / 60) * t.hourlyRate),
-                            };
-                            setDraftSession(s);
-                            setBookingOpen(true);
-                            analyticsTrack("quick_book_initiated", { trainerId: t.id });
-                          }}
-                          style={{ ...styles.secondaryBtn, marginTop: 4 }}
-                        >
-                          Quick Book
-                        </button>
+                        <div id={`paypal-button-container-${planIds[t.id]}`} style={{ minHeight: 40 }}></div>
                       </div>
                     </div>
 
@@ -988,17 +825,17 @@ export default function PersonalTrainingPage(): JSX.Element {
 
             {/* Session builder & preview */}
             <div style={{ display: "grid", gap: 12 }}>
-              <SessionBuilder trainers={trainers} onCreate={createSession} />
-              <SessionPreview session={draftSession} />
+              {isSubscribed ? <SessionBuilder trainers={trainers} onCreate={createSession} /> : paywallMessage}
+              {isSubscribed ? <SessionPreview session={draftSession} /> : paywallMessage}
             </div>
           </div>
 
           <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
-              <ArTryOn label="Premium Glove & Gear Try-On" />
+              {isSubscribed ? <ArTryOn label="Premium Glove & Gear Try-On" /> : paywallMessage}
             </div>
             <div>
-              <ProgressTracker userId={userId} />
+              {isSubscribed ? <ProgressTracker userId={userId} /> : paywallMessage}
             </div>
           </div>
 
@@ -1028,25 +865,38 @@ export default function PersonalTrainingPage(): JSX.Element {
 
             <div style={{ padding: 12, borderRadius: 10, background: "#fff" }}>
               <div style={{ fontWeight: 700 }}>Celebrity & Success</div>
-              <CelebrityGenerator />
+              {isSubscribed ? <CelebrityGenerator /> : paywallMessage}
             </div>
 
             <div style={{ padding: 12, borderRadius: 10, background: "#fff" }}>
-              <ChallengeGenerator />
+              {isSubscribed ? <ChallengeGenerator /> : paywallMessage}
             </div>
 
             <div style={{ padding: 12, borderRadius: 10, background: "#fff" }}>
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>Your Bookings</div>
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>Your Subscription</div>
               <div style={{ display: "grid", gap: 8 }}>
-                {bookings.length === 0 && <div style={{ color: "#6b7280" }}>No bookings yet</div>}
-                {bookings.map((b) => (
-                  <div key={b.id} style={{ padding: 8, borderRadius: 8, border: "1px solid #f3f4f6" }}>
-                    <div style={{ fontWeight: 700 }}>{trainers.find((t) => t.id === b.session.trainerId)?.name || b.session.trainerId}</div>
-                    <div style={{ fontSize: 13, color: "#6b7280" }}>{b.session.focusAreas.join(", ")} • {b.session.durationMinutes}m</div>
+                {subscription ? (
+                  <div style={{ padding: 8, borderRadius: 8, border: "1px solid #f3f4f6" }}>
+                    <div style={{ fontWeight: 700 }}>Subscribed to {subscription.trainer}</div>
+                    <div style={{ fontSize: 13, color: "#6b7280" }}>ID: {subscription.subscriptionID}</div>
                     <div style={{ marginTop: 6, display: "flex", gap: 8 }}>
-                      <button onClick={() => { navigator.clipboard?.writeText(JSON.stringify(b)); alert("Booking details copied (debug)"); }} style={styles.secondaryBtn}>Copy</button>
-                      <button onClick={() => { setBookings((prev) => prev.filter((x) => x.id !== b.id)); saveToLS("pt_bookings", bookings.filter((x) => x.id !== b.id)); analyticsTrack("booking_deleted", { bookingId: b.id }); }} style={{ ...styles.secondaryBtn, background: "#fee2e2" }}>Cancel</button>
+                      <button onClick={() => { saveToLS("subscription", null); setSubscription(null); analyticsTrack("subscription_cancelled"); }} style={{ ...styles.secondaryBtn, background: "#fee2e2" }}>Cancel</button>
                     </div>
+                  </div>
+                ) : (
+                  <div style={{ color: "#6b7280" }}>No active subscription</div>
+                )}
+              </div>
+            </div>
+
+            <div style={{ padding: 12, borderRadius: 10, background: "#fff" }}>
+              <div style={{ fontWeight: 700 }}>Your Sessions</div>
+              <div style={{ display: "grid", gap: 8, marginTop: 8 }}>
+                {sessions.length === 0 && <div style={{ color: "#6b7280" }}>No sessions scheduled yet</div>}
+                {sessions.map((s) => (
+                  <div key={s.id} style={{ padding: 8, borderRadius: 8, border: "1px solid #f3f4f6" }}>
+                    <div style={{ fontWeight: 700 }}>{trainers.find((t) => t.id === s.trainerId)?.name || s.trainerId}</div>
+                    <div style={{ fontSize: 13, color: "#6b7280" }}>{s.focusAreas.join(", ")} • {s.durationMinutes}m</div>
                   </div>
                 ))}
               </div>
@@ -1063,17 +913,22 @@ export default function PersonalTrainingPage(): JSX.Element {
         </aside>
       </main>
 
-      {/* Booking modal */}
-      <BookingModal
-        open={bookingOpen}
-        session={draftSession}
-        onClose={() => setBookingOpen(false)}
-        onConfirmed={(b) => confirmBooking(b)}
-      />
-
       <footer style={{ marginTop: 18, color: "#6b7280", fontSize: 13 }}>
         <div>Premium page — client-side demo features for prototyping and QA.</div>
       </footer>
     </div>
   );
 }
+
+/* small helper for notifications scheduling (reused) */
+const scheduleBrowserNotification = (title: string, opts: NotificationOptions & { delayMs?: number } = {}) => {
+  const delay = opts.delayMs || 0;
+  if (!("Notification" in window)) return;
+  if (Notification.permission === "granted") {
+    setTimeout(() => new Notification(title, opts), delay);
+  } else if (Notification.permission !== "denied") {
+    Notification.requestPermission().then((p) => {
+      if (p === "granted") setTimeout(() => new Notification(title, opts), delay);
+    });
+  }
+};

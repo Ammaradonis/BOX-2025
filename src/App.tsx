@@ -1,11 +1,11 @@
 // src/App.tsx
 import React, { useState } from "react";
-import { HomePage } from "./components/HomePage";
+import HomePage from "./components/HomePage";
 import { AcademyPage } from "./components/AcademyPage";
-import { BootcampPage } from "./components/BootcampPage";
-import { PersonalTrainingPage } from "./components/PersonalTrainingPage";
-import { YouthBoxingPage } from "./components/YouthBoxingPage";
-import { FacilitiesPage } from "./components/FacilitiesPage";
+import BootcampPage from "./components/BootcampPage";
+import PersonalTrainingPage from "./components/PersonalTrainingPage";
+import YouthBoxingPage from "./components/YouthBoxingPage";
+import FacilitiesPage from "./components/FacilitiesPage";
 import SchedulePage from "./components/SchedulePage";
 import ContactPage from "./components/ContactPage";
 import { Toaster } from "./ui/sonner";

@@ -8,10 +8,10 @@ const ImageWithFallback = lazy(() => import('./ImageWithFallback'));
 interface Testimonial {
   id: string;
   name: string;
-  location: string;
+  location?: string; // <-- make optional
   quote: string;
   rating: number;
-  program: string;
+  program?: string;
   image?: string;
 }
 
@@ -41,6 +41,11 @@ export function TestimonialCard({ testimonial, delay = 0 }: TestimonialCardProps
     ));
   };
 
+  const safeLocation = testimonial.location || 'Unknown';
+  const badgeText = testimonial.location
+    ? testimonial.location.split(',')[0].trim()
+    : 'SF'; // fallback
+
   return (
     <article
       key={testimonial.id}
@@ -54,12 +59,12 @@ export function TestimonialCard({ testimonial, delay = 0 }: TestimonialCardProps
           <div className="relative">
             <ImageWithFallback
               src={testimonial.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face'}
-              alt={`Portrait of ${testimonial.name} from ${testimonial.location}`}
+              alt={`Portrait of ${testimonial.name}${testimonial.location ? ` from ${testimonial.location}` : ''}`}
               className="w-16 h-16 rounded-full object-cover"
               loading="lazy"
             />
             <div className="absolute -bottom-1 -right-1 bg-red-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-              {testimonial.location.split(',')[0].trim() || 'SF'}
+              {badgeText}
             </div>
           </div>
         </Suspense>
@@ -68,7 +73,7 @@ export function TestimonialCard({ testimonial, delay = 0 }: TestimonialCardProps
           <h4 id={`${testimonial.id}-name`} className="font-semibold text-gray-900">
             {testimonial.name}
           </h4>
-          <p className="text-sm text-gray-600">{testimonial.location}</p>
+          <p className="text-sm text-gray-600">{safeLocation}</p>
           <div className="flex items-center space-x-1 mt-1" role="img" aria-label={`Rated ${testimonial.rating} out of 5 stars`}>
             {renderStars(testimonial.rating)}
           </div>
@@ -82,11 +87,13 @@ export function TestimonialCard({ testimonial, delay = 0 }: TestimonialCardProps
         </blockquote>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-100 px-4 pb-4">
-        <span className="inline-block bg-red-100 text-red-800 text-xs px-3 py-1 rounded-full font-medium">
-          {testimonial.program}
-        </span>
-      </div>
+      {testimonial.program && (
+        <div className="mt-4 pt-4 border-t border-gray-100 px-4 pb-4">
+          <span className="inline-block bg-red-100 text-red-800 text-xs px-3 py-1 rounded-full font-medium">
+            {testimonial.program}
+          </span>
+        </div>
+      )}
     </article>
   );
 }
@@ -95,10 +102,10 @@ TestimonialCard.propTypes = {
   testimonial: PropTypes.shape({
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
-    location: PropTypes.string.isRequired,
+    location: PropTypes.string, // <-- no longer required
     quote: PropTypes.string.isRequired,
     rating: PropTypes.number.isRequired,
-    program: PropTypes.string.isRequired,
+    program: PropTypes.string,
     image: PropTypes.string,
   }).isRequired,
   delay: PropTypes.number,

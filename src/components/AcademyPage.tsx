@@ -43,6 +43,7 @@ interface PricingTier {
   features: string[];
   cta: string;
   popular: boolean;
+  planId: string;
 }
 interface Graduate {
   name: string;
@@ -470,7 +471,39 @@ const UserProgressCard: React.FC<{ initial?: UserProgress }> = ({ initial }) => 
   );
 };
 
-export function AcademyPage({ onBookClass }: AcademyPageProps) {
+interface PayPalSubscribeButtonProps {
+  planId: string;
+  onSuccess: (subscriptionId: string) => void;
+}
+
+const PayPalSubscribeButton: React.FC<PayPalSubscribeButtonProps> = ({ planId, onSuccess }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (window.paypal && containerRef.current) {
+      window.paypal.Buttons({
+        style: {
+          shape: 'pill',
+          color: 'gold',
+          layout: 'vertical',
+          label: 'subscribe'
+        },
+        createSubscription: function(data: any, actions: any) {
+          return actions.subscription.create({
+            plan_id: planId
+          });
+        },
+        onApprove: function(data: any, actions: any) {
+          onSuccess(data.subscriptionID);
+        }
+      }).render(containerRef.current);
+    }
+  }, [planId, onSuccess]);
+
+  return <div ref={containerRef} />;
+};
+
+export function AcademyPage({ onBookClass = () => {} }: AcademyPageProps) {
   const phases: Phase[] = [
     {
       id: 'foundations',
@@ -565,7 +598,8 @@ export function AcademyPage({ onBookClass }: AcademyPageProps) {
         'Detailed Progress Tracking Tools to Monitor Your Advancement'
       ],
       cta: 'START YOUR FOG BELT JOURNEY',
-      popular: false
+      popular: false,
+      planId: 'P-0XA82551G4482814TNCYGEIQ'
     },
     {
       id: 'golden-gate-belt',
@@ -582,7 +616,8 @@ export function AcademyPage({ onBookClass }: AcademyPageProps) {
         'Customized Nutrition Guidance to Optimize Performance and Recovery'
       ],
       cta: 'ELEVATE WITH GOLDEN GATE BELT',
-      popular: true
+      popular: true,
+      planId: 'P-38366759K40412012NCYGJJY'
     },
     {
       id: 'bart-pass',
@@ -599,7 +634,8 @@ export function AcademyPage({ onBookClass }: AcademyPageProps) {
         'Premium Equipment Provided, Including Gloves, Wraps, and Gear'
       ],
       cta: 'UNLOCK UNLIMITED POTENTIAL',
-      popular: false
+      popular: false,
+      planId: 'P-37M89752833316030NCYGNPA'
     }
   ];
   const graduates: Graduate[] = [
@@ -619,6 +655,29 @@ export function AcademyPage({ onBookClass }: AcademyPageProps) {
 
   const onChallengeGenerated = useCallback((c: Challenge) => {
     // Optional hook for future integration
+  }, []);
+
+  const [subscribed, setSubscribed] = useState(() => localStorage.getItem('subscribed') === 'true');
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+
+  useEffect(() => {
+    const existingScript = document.querySelector('script[src*="paypal.com/sdk/js"]');
+    if (existingScript) {
+      setScriptLoaded(true);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://www.paypal.com/sdk/js?client-id=Aa_Q-b8Ey9eMTCZ-nrD44nVFKMbPmkeNCu4jSSNPQUdLq92W7kMB_RY3xSdQCpg66RrpPV8pgLZTIboZ&vault=true&intent=subscription';
+    script.async = true;
+    script.onload = () => setScriptLoaded(true);
+    document.body.appendChild(script);
+
+    return () => {
+      if (!existingScript && script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
   }, []);
 
   return (
@@ -748,13 +807,21 @@ export function AcademyPage({ onBookClass }: AcademyPageProps) {
                   Leverage our suite of advanced tools to personalize your training, track progress, draw inspiration, and simulate real-world success scenarios—all designed to accelerate your path to boxing mastery.
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                <UserProgressCard />
-                <ChallengeGenerator onGenerate={onChallengeGenerated} />
-                <LeaderboardBracket />
-                <CelebrityGenerator />
-                <FameSimulator />
-              </div>
+              {subscribed ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                  <UserProgressCard />
+                  <ChallengeGenerator onGenerate={onChallengeGenerated} />
+                  <LeaderboardBracket />
+                  <CelebrityGenerator />
+                  <FameSimulator />
+                </div>
+              ) : (
+                <div className="text-center p-8 bg-white rounded-lg shadow">
+                  <h3 className="text-xl font-bold mb-4">Access Restricted to Members</h3>
+                  <p className="text-gray-600 mb-6">Subscribe to one of our membership plans to unlock interactive training tools and personalize your boxing journey.</p>
+                  <a href="#pricing" className="btn btn-primary">View Membership Plans</a>
+                </div>
+              )}
             </div>
           </section>
           {/* Coach Roster from first snippet */}
@@ -820,7 +887,7 @@ export function AcademyPage({ onBookClass }: AcademyPageProps) {
             </div>
           </section>
           {/* Pricing Tiers from first snippet */}
-          <section className="py-12 sm:py-20 bg-white">
+          <section id="pricing" className="py-12 sm:py-20 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12 sm:mb-16">
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
@@ -862,20 +929,18 @@ export function AcademyPage({ onBookClass }: AcademyPageProps) {
                         </li>
                       ))}
                     </ul>
-                    <button
-                      onClick={() => onBookClass({
-                        id: `academy-${tier.id}`,
-                        name: `Academy ${tier.name}`,
-                        description: tier.description,
-                        level: 'academy',
-                        price: tier.price,
-                        membership: tier.name
-                      })}
-                      className={`btn w-full ${tier.popular ? 'btn-primary' : 'btn-secondary'}`}
-                      aria-label={`Select ${tier.name} membership plan`}
-                    >
-                      {tier.cta}
-                    </button>
+                    {scriptLoaded ? (
+                      <PayPalSubscribeButton
+                        planId={tier.planId}
+                        onSuccess={(id) => {
+                          localStorage.setItem('subscribed', 'true');
+                          setSubscribed(true);
+                          alert(`Successfully subscribed to ${tier.name}! Subscription ID: ${id}`);
+                        }}
+                      />
+                    ) : (
+                      <div className="text-center">Loading PayPal...</div>
+                    )}
                   </div>
                 ))}
               </div>
